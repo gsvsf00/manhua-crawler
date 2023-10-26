@@ -21,14 +21,14 @@ async function crawlPage(BaseURL, currentUrl, pages){
     const resp = await fetch(currentUrl)
 
     if (resp.status > 399) {
-      console.log(`Error crawling ${currentUrl}: ${resp.status}`)
+      //console.log(`Error crawling ${currentUrl}: ${resp.status}`)
       return pages
     }
 
     const contentType = resp.headers.get('content-type')
     if (!contentType || !contentType.includes('text/html')) {
-      console.log(`Error crawling ${currentUrl}: ${contentType}`)
-      pages
+      //console.log(`Error crawling ${currentUrl}: ${contentType}`)
+      return pages
     }
 
     const htmlBody = await resp.text()
@@ -39,7 +39,7 @@ async function crawlPage(BaseURL, currentUrl, pages){
     }
     
   } catch(err) {
-    console.log(`Error crawling ${currentUrl}: ${err.message}`)
+    //console.log(`Error crawling ${currentUrl}: ${err.message}`)
   }
   return pages
 }
