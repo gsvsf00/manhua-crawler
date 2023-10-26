@@ -19,5 +19,8 @@
   "homepage": "https://github.com/gsvsf00/manhua-crawler#readme",
   "devDependencies": {
     "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "jsdom": "^22.1.0"
   }
 }
