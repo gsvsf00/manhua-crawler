@@ -46,8 +46,23 @@ async function getSelectedLinkIndex(maxIndex) {
     });
 }
 
+async function getCapChoice() {
+    const readline = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    return new Promise(resolve => {
+        readline.question(`Enter 'all' to fetch all chapters or specify a range (e.g., 10-29): `, choice => {
+            readline.close();
+            resolve(choice);
+        });
+    });
+}
+
 module.exports = {
     getOptionFromUser,
     getContentFromUser,
-    getSelectedLinkIndex
+    getSelectedLinkIndex,
+    getCapChoice
 };
