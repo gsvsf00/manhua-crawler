@@ -37,6 +37,7 @@ async function crawlPage(BaseURL, currentUrl, pages){
     for (const nextUrl of nextUrls) {
       await crawlPage(BaseURL, nextUrl, pages)
     }
+    
   } catch(err) {
     console.log(`Error crawling ${currentUrl}: ${err.message}`)
   }
