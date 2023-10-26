@@ -44,29 +44,24 @@ async function crawlPage(BaseURL, currentUrl, pages){
   return pages
 }
 
-function getURLsFromHTML(htmlBody , baseURL) {
-  const urls = []
-  const dom = new JSDOM(htmlBody)
-  const linkElelemts = dom.window.document.querySelectorAll('a')
+function getURLsFromHTML(htmlBody, baseURL) {
+  const urls = [];
+  const dom = new JSDOM(htmlBody);
+  const linkElements = dom.window.document.querySelectorAll('a');
 
-  for (const linkElelemt of linkElelemts) {
-    if(linkElelemt.href.slice(0,1) === '/') {
-      try {
-        const urlObject = new URL(`${baseURL}${linkElelemt.href}`)
-        urls.push(urlObject.href)
-      } catch(err){
-          //console.log(`error with relative url: ${linkElelemt.href}`)
+  for (const linkElement of linkElements) {
+    try {
+      const urlObject = new URL(linkElement.href);
+      const pathname = urlObject.pathname;
+      if (pathname.startsWith('/manga/') && pathname.includes('/9766692502')) {
+        urls.push(urlObject.href);
       }
-    } else {
-        try {
-          const urlObject = new URL(linkElelemt.href)
-          urls.push(urlObject.href)
-        } catch(err){
-            //console.log(`error with absolute url: ${err.message}`)
-        }
-      }
+    } catch (err) {
+      // Handle URL parsing errors, if necessary
+      // console.log(`Error with URL: ${err.message}`);
+    }
   }
-  return urls
+  return urls;
 }
 
 function getURLsFromPage(page) {
