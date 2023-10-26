@@ -65,7 +65,6 @@ test('getURLsFromHTML both', () => {
     <html>
         <body>
             <a href="https://asuratoon.com/path1/">link1</a>
-
             <a href="/path2/">link2</a>
         </body>
     </html>
