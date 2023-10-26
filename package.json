@@ -1,0 +1,23 @@
+{
+  "name": "manhua-crawler",
+  "version": "1.0.0",
+  "description": "This is a js project for craw the manhua caps from Asura Scans.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gsvsf00/manhua-crawler.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gsvsf00/manhua-crawler/issues"
+  },
+  "homepage": "https://github.com/gsvsf00/manhua-crawler#readme",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}
