@@ -1,8 +1,7 @@
-const { crawlPage } = require('./crawl.js');
-const { printReport } = require('./report.js');
 const { getContentFromUser, getOptionFromUser, getSelectedLinkIndex, getCapChoice } = require('./userInput.js');
 const { performSearchAndGetURL } = require('./search.js');
-const { filterSearchContent, filterCapContent, fetchAndProcessChapters } = require('./filterContent.js');
+const { filterSearchContent, filterCapContent, fetchAndProcessChapters, filterImgFromCapContent } = require('./filterContent.js');
+const { createPDFFromImages } = require('./makePdf.js');
 
 function clearConsole() {
     console.clear();
@@ -10,19 +9,25 @@ function clearConsole() {
 
 async function main() {
     const option = await getOptionFromUser();
+    let capList = null;
+    let chaptersChoose = null;
 
-    if (option === 'crawl') {
+    if (option === '1') {
         const content = await getContentFromUser('Enter the URL to crawl: ');
         if (content) {
-            console.log("Starting crawler for " + content);
-            const capList = await filterCapContent(content);
-            console.log("It has " + capList.numCaps + " caps");
-            console.log(capList);
+            console.log("Starting crawler");
+
+            capList = await filterCapContent(content);
+
+            console.log("\nSelected link:", content);
+            console.log("It has " + capList.count + " caps");
+
+            chaptersChoose = await fetchAndProcessChapters(capList);
         } else {
             console.log("Invalid input");
         }
     }
-    else if (option === 'search') {
+    else if (option === '2') {
         const searchTerm = await getContentFromUser('Enter the content to search: ');
         if (searchTerm) {
             const pageUrl = await performSearchAndGetURL(searchTerm);
@@ -43,17 +48,23 @@ async function main() {
             //clearConsole();
 
             console.log("Selected link:", selectedLink.link);
-            const capList = await filterCapContent(selectedLink.link);
+            capList = await filterCapContent(selectedLink.link);
             console.log("It has " + capList.count + " caps");
 
-            const chaptersChoose = await fetchAndProcessChapters(capList);
-            console.log("ChaptersChoose: ", chaptersChoose);
+            chaptersChoose = await fetchAndProcessChapters(capList);
         } 
         else
             console.log("Invalid input");
     } 
     else 
         console.log("Invalid option");
+
+    console.log("chaptersChoose: ", chaptersChoose);
+    const imgList = await filterImgFromCapContent(chaptersChoose)
+
+    const pdfFileName = capList.title;
+    await createPDFFromImages(imgList, pdfFileName);
+
 }
 
 main();

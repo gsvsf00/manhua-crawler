@@ -5,7 +5,7 @@ async function getOptionFromUser() {
     });
 
     return new Promise(resolve => {
-        readline.question('Choose an option ("crawl" or "search"): ', option => {
+        readline.question('Choose an option ("1: Direct Url" or "2: search"): ', option => {
             readline.close();
             resolve(option);
         });
