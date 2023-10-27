@@ -21,10 +21,15 @@ async function main() {
         } else {
             console.log("Invalid input");
         }
-    } else if (option === 'search') {
+    }
+    else if (option === 'search') {
         const searchTerm = await getContentFromUser('Enter the content to search: ');
         if (searchTerm) {
             const pageUrl = await performSearchAndGetURL(searchTerm);
+
+            if (!pageUrl)
+                process.exit(1);
+
             const filteredLinks = await filterSearchContent(pageUrl);
             console.log("Filtered links with titles:");
 
@@ -35,21 +40,20 @@ async function main() {
             const selectedLinkIndex = await getSelectedLinkIndex(filteredLinks.length);
             const selectedLink = filteredLinks[selectedLinkIndex];
 
-            clearConsole();
+            //clearConsole();
 
             console.log("Selected link:", selectedLink.link);
             const capList = await filterCapContent(selectedLink.link);
             console.log("It has " + capList.count + " caps");
 
-            fetchAndProcessChapters(capList.links);
-
-        } else {
+            const chaptersChoose = await fetchAndProcessChapters(capList);
+            console.log("ChaptersChoose: ", chaptersChoose);
+        } 
+        else
             console.log("Invalid input");
-        }
-    } else {
+    } 
+    else 
         console.log("Invalid option");
-    }
 }
-
 
 main();

@@ -1,7 +1,11 @@
 const cheerio = require('cheerio');
 const axios = require('axios');
+const { transcode } = require('buffer');
 
 function filterSearchContent(url) {
+    if (!url) {
+        throw new Error("URL not provided");
+    }
     return axios.get(url)
         .then(response => {
             const html = response.data;
@@ -26,6 +30,10 @@ function filterSearchContent(url) {
 }
 
 async function filterCapContent(url) {
+    if (!url) {
+        throw new Error("URL not provided");
+    }
+
     const response = await axios.get(url);
     const html = response.data;
     const $ = cheerio.load(html);
@@ -45,12 +53,13 @@ async function filterCapContent(url) {
 async function fetchAndProcessChapters(capList) {
     console.log("Fetching and processing chapters...");
 
+    const caplist = capList;
+
     const readline = require('readline').createInterface({
         input: process.stdin,
         output: process.stdout
     });
 
-    const capCount = capList.length;
     const validOptions = ['all', 'exit'];
 
     // Ask the user for their choice
@@ -63,56 +72,39 @@ async function fetchAndProcessChapters(capList) {
 
     if (validOptions.includes(choice.toLowerCase())) {
         if (choice.toLowerCase() === 'all') {
-            // Fetch and process all chapters
-            console.log(`Fetching all ${capCount} chapters...`);
-            return capList.links.forEach(async (link, index) => {
-                console.log(`Fetching and processing chapter ${index + 1}: ${link}`);
-                try {
-                    const chapterContent = await fetchChapterContent(link);
-                    const processedContent = processChapter(chapterContent);
-                    console.log(processedContent);
-                } catch (error) {
-                    console.error(`Error fetching or processing chapter: ${link}`);
-                }
-            });
-            } 
-            else if (choice.toLowerCase() === 'exit') 
-                return;
+            console.log(`Fetching all ${caplist.count} chapters...`);
+            return capList;
         } 
-    else if (choice.includes('-')) {
+        else if (choice.toLowerCase() === 'exit') {
+            return;
+        }
+    } else if (choice.includes('-')) {
         const [start, end] = choice.split('-').map(num => parseInt(num, 10));
-        if (!isNaN(start) && !isNaN(end) && start <= end && start >= 1 && end <= capCount) {
+        if (!isNaN(start) && !isNaN(end) && start <= end && start >= 1 && end <= caplist.count) {
             console.log(`Fetching chapters from ${start} to ${end}...`);
-            console.log(`Select ` + `${end - start + 1}` + ` chapters`)
+            console.log(`Select ${end - start + 1} chapters`);
+
+            const selectedLinks = [];
+
             for (let i = start - 1; i < end; i++) {
-                const link = capList[i].link;
-                console.log(`Fetching and processing chapter ${i + 1}: ${link}`);
-                try {
-                    const chapterContent = await fetchChapterContent(link);
-                    const processedContent = processChapter(chapterContent);
-                    console.log(processedContent);
-                } catch (error) {
-                    console.error(`Error fetching or processing chapter: ${link}`);
-                }1
+                console.log("Fetching and processing chapter:[",i+1,"] -", caplist.links[i]);
+                selectedLinks.push(caplist.links[i]);
             }
+
+            return selectedLinks;
         } else {
             console.log("Invalid range. Please enter a valid range.");
-            }
-    } 
-    else {
+            return fetchAndProcessChapters(capList); // Return the result of the recursive call
+        }
+    } else {
         const index = parseInt(choice, 10);
-        if (!isNaN(index) && index >= 1 && index <= capCount) {
-            const link = capList[index - 1].link;
+        if (!isNaN(index) && index >= 1 && index <= caplist.count){
+            const link = caplist.links[index - 1];
             console.log(`Fetching and processing chapter ${index}: ${link}`);
-            try {
-                const chapterContent = await fetchChapterContent(link);
-                const processedContent = processChapter(chapterContent);
-                console.log(processedContent);
-            } catch (error) {
-                console.error(`Error fetching or processing chapter: ${link}`);
-            }
+            return link;
         } else {
             console.log("Invalid choice. Please select a valid range or index.");
+            return fetchAndProcessChapters(capList); // Return the result of the recursive call
         }
     }
 }
