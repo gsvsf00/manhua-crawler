@@ -5,10 +5,53 @@ const path = require('path');
 const { promisify } = require('util');
 const writeFile = promisify(fs.writeFile);
 const mkdir = promisify(fs.mkdir);
+const { getPDFGenerationChoice } = require('./userInput.js');
+const { filterImgFromCapContent } = require('./filterContent.js');
 
-async function createPDFFromImages(imgList, pdfFileName) {
-    // Create a folder with the same name as the PDF file
-    const folderName = path.basename(pdfFileName, path.extname(pdfFileName));
+async function createPdfFromChoice(chaptersChoose, title) {
+    let pdfGenerationChoice = ''; // Initialize the choice variable
+
+    if (typeof chaptersChoose.chapter === 'number') {
+        console.log("\nSingle chapter selected.\n");
+        const imgList = await filterImgFromCapContent(chaptersChoose.links);
+        const pdfFileName = `${title} - ${chaptersChoose.chapter}.pdf`;
+        await createPDFFromImages(imgList, pdfFileName, title);
+        return;
+    } else if (chaptersChoose.chapter !== 'all') {
+        chaptersChoose.length = chaptersChoose.chapter[1] - chaptersChoose.chapter[0] + 1;
+        console.log("Length", chaptersChoose.length);
+    }
+
+    pdfGenerationChoice = await getPDFGenerationChoice();
+
+    if (pdfGenerationChoice.toLowerCase() === 's') {
+        for (let i = 0; i < chaptersChoose.length; i++) {
+            const pdfFileName = `${title}_chapter_${i + 1}.pdf`;
+            const selectedChapters = chaptersChoose.links[i]; // Use all chapters
+            await createPDFFromImages(selectedChapters, pdfFileName);
+        }
+    } else if (pdfGenerationChoice.toLowerCase() === 'm') {
+        const startChapter = chaptersChoose.chapter[0];
+        const endChapter = chaptersChoose.chapter[1];
+        const mergedPDFFileName = `${title} ${startChapter}-${endChapter}.pdf`;
+        const mergedChapters = [];
+
+        for (let i = startChapter - 1; i < endChapter; i++) {
+            const imgList = await filterImgFromCapContent(chaptersChoose.links[i]);
+            mergedChapters.push(...imgList);
+        }
+
+        await createPDFFromImages(mergedChapters, mergedPDFFileName, title);
+    } else {
+        console.log("Invalid PDF generation choice.");
+        createPdfFromChoice(chaptersChoose, title);
+    }
+}
+
+async function createPDFFromImages(imgList, pdfFileName, title) {
+    
+    const folderName = path.basename(title, path.extname(title));
+
     const folderPath = path.join(__dirname, folderName);
 
     if (!fs.existsSync(folderPath)) {
@@ -62,5 +105,6 @@ async function createPDFFromImages(imgList, pdfFileName) {
 }
 
 module.exports = {
-    createPDFFromImages
+    createPDFFromImages,
+    createPdfFromChoice
 }

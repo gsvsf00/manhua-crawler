@@ -76,7 +76,13 @@ async function fetchAndProcessChapters(capList) {
     if (validOptions.includes(choice.toLowerCase())) {
         if (choice.toLowerCase() === 'all') {
             console.log(`\nFetching all ${caplist.count} chapters...`);
-            return capList;
+            const selectedLinks = [];
+
+            for (let i = 0; i < caplist.count; i++) {
+                console.log("\nFetching and processing chapter:[",i+1,"] -", caplist.links[i]);
+                selectedLinks.push(caplist.links[i]);
+            }
+            return { chapter: [1, caplist.count], links: selectedLinks };
         } 
         else if (choice.toLowerCase() === 'exit') {
             return;
@@ -90,11 +96,11 @@ async function fetchAndProcessChapters(capList) {
             const selectedLinks = [];
 
             for (let i = start - 1; i < end; i++) {
-                console.log("\nFetching and processing chapter:[",i+1,"] -", caplist.links[i+1]);
+                console.log("\nFetching and processing chapter:[",i+1,"] -", caplist.links[i]);
                 selectedLinks.push(caplist.links[i]);
             }
 
-            return selectedLinks;
+            return { chapter: [start, end], links: selectedLinks };
         } else {
             console.log("Invalid range. Please enter a valid range.");
             return fetchAndProcessChapters(capList); // Return the result of the recursive call
@@ -103,8 +109,8 @@ async function fetchAndProcessChapters(capList) {
         const index = parseInt(choice, 10);
         if (!isNaN(index) && index >= 1 && index <= caplist.count){
             const link = caplist.links[index];
-            console.log(`\nFetching and processing chapter ${index}: ${link}`);
-            return link;
+            console.log("\nFetching and processing chapter:[",index,"] -", caplist.links[index]);
+            return { chapter: index, links: [link] };
         } else {
             console.log("Invalid choice. Please select a valid range or index.");
             return fetchAndProcessChapters(capList); // Return the result of the recursive call
@@ -112,12 +118,12 @@ async function fetchAndProcessChapters(capList) {
     }
 }
 
-function filterImgFromCapContent(chaptersChoose) {
-    if (!chaptersChoose) {
+function filterImgFromCapContent(imageList) {
+    if (!imageList) {
         throw new Error("Images not found");
     }
 
-    return axios.get(chaptersChoose)
+    return axios.get(imageList)
         .then(response => {
             const html = response.data;
             const $ = cheerio.load(html);

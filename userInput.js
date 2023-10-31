@@ -60,9 +60,25 @@ async function getCapChoice() {
     });
 }
 
+async function getPDFGenerationChoice() {
+    const readline = require('readline').createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    return new Promise((resolve) => {
+        readline.question(`Do you want to create separate PDFs for each chapter (s) or merge all chapters into a single PDF (m)? `, (choice) => {
+            readline.close();
+            resolve(choice);
+        });
+    });
+}
+
+
 module.exports = {
     getOptionFromUser,
     getContentFromUser,
     getSelectedLinkIndex,
-    getCapChoice
+    getCapChoice,
+    getPDFGenerationChoice
 };

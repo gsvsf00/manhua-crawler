@@ -1,11 +1,7 @@
-const { getContentFromUser, getOptionFromUser, getSelectedLinkIndex, getCapChoice } = require('./userInput.js');
+const { getContentFromUser, getOptionFromUser, getSelectedLinkIndex, getPDFGenerationChoice } = require('./userInput.js');
 const { performSearchAndGetURL } = require('./search.js');
-const { filterSearchContent, filterCapContent, fetchAndProcessChapters, filterImgFromCapContent } = require('./filterContent.js');
-const { createPDFFromImages } = require('./makePdf.js');
-
-function clearConsole() {
-    console.clear();
-}
+const { filterSearchContent, filterCapContent, fetchAndProcessChapters } = require('./filterContent.js');
+const { createPdfFromChoice } = require('./makePdf.js');
 
 async function main() {
     const option = await getOptionFromUser();
@@ -23,11 +19,12 @@ async function main() {
             console.log("It has " + capList.count + " caps");
 
             chaptersChoose = await fetchAndProcessChapters(capList);
+
+            createPdfFromChoice(chaptersChoose, capList.title);
         } else {
             console.log("Invalid input");
         }
-    }
-    else if (option === '2') {
+    } else if (option === '2') {
         const searchTerm = await getContentFromUser('Enter the content to search: ');
         if (searchTerm) {
             const pageUrl = await performSearchAndGetURL(searchTerm);
@@ -45,26 +42,20 @@ async function main() {
             const selectedLinkIndex = await getSelectedLinkIndex(filteredLinks.length);
             const selectedLink = filteredLinks[selectedLinkIndex];
 
-            //clearConsole();
-
             console.log("Selected link:", selectedLink.link);
             capList = await filterCapContent(selectedLink.link);
             console.log("It has " + capList.count + " caps");
 
             chaptersChoose = await fetchAndProcessChapters(capList);
-        } 
-        else
+
+            createPdfFromChoice(chaptersChoose, capList.title);
+
+        } else {
             console.log("Invalid input");
-    } 
-    else 
+        }
+    } else {
         console.log("Invalid option");
-
-    console.log("chaptersChoose: ", chaptersChoose);
-    const imgList = await filterImgFromCapContent(chaptersChoose)
-
-    const pdfFileName = capList.title;
-    await createPDFFromImages(imgList, pdfFileName);
-
+    }
 }
 
 main();
